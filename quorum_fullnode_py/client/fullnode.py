@@ -1,6 +1,6 @@
 import logging
 
-from quorum_fullnode_py.api import FullNodeAPI
+from quorum_fullnode_py.api.fullnode import FullNodeAPI
 from quorum_fullnode_py.client._http import HttpRequest
 from quorum_fullnode_py.exceptions import ParamValueError
 

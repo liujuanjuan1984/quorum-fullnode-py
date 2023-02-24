@@ -1,0 +1,3 @@
+requests
+quorum_data_py
+pytest-ordering

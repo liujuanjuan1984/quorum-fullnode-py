@@ -1,54 +1,63 @@
 # quorum_fullnode_py
 
-Python SDK for FullNode of [QuoRum](https://github.com/rumsystem/quorum).
+Python SDK for Quorum FullNode.
 
-### About QuoRum
+More about QuoRum:
 
 - https://rumsystem.net/
 - https://github.com/rumsystem/quorum
-- https://docs.rumsystem.net/docs/data-format-and-examples
 
 ### Install
-
-[quorum_fullnode_py@pypi](https://pypi.org/project/quorum_fullnode_py/)
 
 ```sh
 pip install quorum_fullnode_py
 ```
 
-### Examples
+### Usage
 
 ```python
-
 from quorum_fullnode_py import FullNode
-from quorum_fullnode_py import FeedData as feed
 
-bot = FullNode(port=11002)
+url = "http://127.0.0.1:11002"
+jwt = "eyJhbGciO...VCJ9.eyJhbGxvd0...pbiJ9.FeyMWvzweE...o66QZ735nsrU"
 
-bot.api.node_info()
-info = bot.api.create_group('test_group')
-bot.group_id = info['group_id']
+# connect to a quorum fullnode with api url and chain jwt_token
+client = FullNode(api_base=url, jwt_token=jwt)
 
-data = feed.new_post(content='hello guys',images=[])
-bot.api.post_content(data)
+# check node_status is online.
+client.api.node_info().get("node_status") == "NODE_ONLINE"
 
-data = feed.like('a-post-id')
-bot.api.post_content(data)
+# create a group chain for test
+info = client.api.create_group("test_group")
+client.group_id = info["group_id"]
+
+# send a new post to the group chain
+data = {
+    "type": "Create",
+    "object": {
+        "type": "Note",
+        "content": "nice to meet u!",
+        "name": "hi",
+        "id": "efb14f14-f849-4cf3-bcb6-c3598e857adb",
+    },
+}
+resp = client.api.post_content(data)
+
+# get trx from group chain
+trx = client.api.trx(resp['trx_id'])
+
+# get content:
+trxs = client.api.get_content()
+
 ```
 
-### pylint
+### Source
 
-```sh
-isort ./quorum_fullnode_py/
-black ./quorum_fullnode_py/
-pylint ./quorum_fullnode_py/ --output=pylint.log
-
-isort ./tests/
-black ./tests/
-pylint ./tests/ --output=pylint_tests.log
-
-```
-
+- quorum lightnode sdk for python: https://github.com/zhangwm404/quorum-lightnode-py 
+- quorum data module for python: https://github.com/okdaodine/quorum-data-py
+- quorum fullnode sdk for nodejs: https://github.com/okdaodine/rum-fullnode-sdk 
+- quorum lightnode sdk for nodejs: https://github.com/okdaodine/rum-sdk-nodejs
+- and more.. https://github.com/okdaodine/awesome-quorum
 
 ### License
 
