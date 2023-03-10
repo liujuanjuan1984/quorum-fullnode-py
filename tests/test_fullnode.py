@@ -84,7 +84,7 @@ def test_post_content():
     try:
         data = feed.new_post(content=None, images=[], name="test_postid")
         resp = bot.api.post_content(data)
-    except ParamValueError:
+    except ValueError:
         pass
 
     for resp in resps:

@@ -54,7 +54,7 @@ trxs = client.api.get_content()
 ### Source
 
 - quorum lightnode sdk for python: https://github.com/zhangwm404/quorum-lightnode-py 
-- quorum data module for python: https://github.com/okdaodine/quorum-data-py
+- quorum data module for python: https://github.com/liujuanjuan1984/quorum-data-py
 - quorum fullnode sdk for nodejs: https://github.com/okdaodine/rum-fullnode-sdk 
 - quorum lightnode sdk for nodejs: https://github.com/okdaodine/rum-sdk-nodejs
 - and more.. https://github.com/okdaodine/awesome-quorum
