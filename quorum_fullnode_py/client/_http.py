@@ -1,4 +1,5 @@
 import logging
+import os
 
 import requests
 
@@ -6,21 +7,24 @@ logger = logging.getLogger(__name__)
 
 
 class HttpRequest:
+    """Class for making http requests"""
+
     def __init__(
         self,
         api_base: str,
         jwt_token: str = None,
     ):
-
+        """Initializes the HttpRequest class"""
         requests.adapters.DEFAULT_RETRIES = 5
         self.api_base = api_base
-        self._session = requests.Session()
-        self.headers = {
-            "USER-AGENT": "quorum_fullnode_py.http_request",
-            "Content-Type": "application/json",
-        }
+        self.session = requests.Session()
+        headers = {"Content-Type": "application/json"}
         if jwt_token:
-            self.headers.update({"Authorization": f"Bearer {jwt_token}"})
+            headers.update({"Authorization": f"Bearer {jwt_token}"})
+        self.session.headers.update(headers)
+
+        _no_proxy = os.getenv("NO_PROXY", "")
+        os.environ["NO_PROXY"] = ",".join([_no_proxy, self.api_base])
 
     def _request(
         self,
@@ -29,19 +33,15 @@ class HttpRequest:
         payload: dict = None,
     ):
         url = "".join([self.api_base, endpoint])
-        resp = self._session.request(
-            method=method, url=url, json=payload, headers=self.headers
-        )
-
+        resp = self.session.request(method=method, url=url, json=payload)
         logger.debug(
-            "method: %s, resp.status_code: %s, url: %s\njson: %s\nresp: %s",
+            "%s\t%s\t%s\npayload: %s\nresp: %s",
             method,
             resp.status_code,
             url,
             payload,
-            resp,
+            resp.json(),
         )
-
         return resp.json()
 
     def get(self, endpoint: str, payload: dict = None):
