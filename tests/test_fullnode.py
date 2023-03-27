@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from quorum_data_py import FeedData as feed
+from quorum_data_py import feed
 
 from quorum_fullnode_py.exceptions import ParamValueError
 from tests import bot

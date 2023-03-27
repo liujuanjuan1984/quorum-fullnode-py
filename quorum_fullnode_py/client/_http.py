@@ -24,7 +24,8 @@ class HttpRequest:
         self.session.headers.update(headers)
 
         _no_proxy = os.getenv("NO_PROXY", "")
-        os.environ["NO_PROXY"] = ",".join([_no_proxy, self.api_base])
+        if self.api_base not in _no_proxy:
+            os.environ["NO_PROXY"] = ",".join([_no_proxy, self.api_base])
 
     def _request(
         self,
