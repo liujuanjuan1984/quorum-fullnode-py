@@ -31,6 +31,10 @@ class BaseAPI:
         """return list of groups info which this node has joined"""
         return self._get("/api/v1/groups")
 
+    def _get_group(self, group_id: str):
+        """return list of groups info which this node has joined"""
+        return self._get(f"/api/v1/group/{group_id}")
+
     def _get_seed(self, group_id: str = None):
         return self._get(f"/api/v1/group/{group_id}/seed")
 

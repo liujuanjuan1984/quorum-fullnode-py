@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 
@@ -118,13 +119,7 @@ class FullNodeAPI(BaseAPI):
     def group_info(self, group_id: str = None) -> dict:
         """get the group info"""
         group_id = self._check_group_joined_as_required(group_id)
-        info = {}
-        groups = super()._get_groups().get("groups", [])
-        for _info in groups:
-            if _info["group_id"] == group_id:
-                info = _info
-                break
-        return info
+        return super()._get_group(group_id)
 
     def create_group(
         self,
@@ -203,7 +198,11 @@ class FullNodeAPI(BaseAPI):
             params["includestarttrx"] = includestarttrx
         if senders:
             params["senders"] = senders
-        return super()._get_content(group_id, params)
+        trxs = []
+        for i in super()._get_content(group_id, params):
+            i["Data"] = json.loads(base64.b64decode(i["Data"]))
+            trxs.append(i)
+        return trxs
 
     def trx(self, trx_id: str, group_id: str = None):
         """get trx data by trx_id"""
