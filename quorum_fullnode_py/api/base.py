@@ -1,6 +1,6 @@
 import json
 import logging
-from urllib import parse
+from urllib.parse import urlencode
 
 from quorum_fullnode_py.client._http import HttpRequest
 
@@ -96,8 +96,8 @@ class BaseAPI:
             for k, v in query_params.items():
                 if isinstance(v, bool):
                     query_params[k] = json.dumps(v)
-            query_ = parse.urlencode(query_params)
-            endpoint = "?".join([endpoint, query_])
+            query_string = urlencode(query_params, doseq=True)
+            endpoint = f"{endpoint}?{query_string}"
         return self._get(endpoint)
 
     def _get_appconfig_keylist(self, group_id: str = None):

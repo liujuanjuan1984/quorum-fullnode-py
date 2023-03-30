@@ -128,13 +128,7 @@ class FullNodeAPI(BaseAPI):
         consensus_type: str = "poa",
         encryption_type: str = "public",
     ) -> dict:
-        """create a group, return the seed of the group.
-
-        group_name: 自定义，创建后不可更改
-        consensus_type: poa，pos 等，目前只支持了 poa
-        encryption_type: "public","private"
-        app_key: 可以为自定义。如果想要和已有的 app 兼容，推荐采用 group_timeline, group_post, group_note 等
-        """
+        """create a group, return the seed of the group."""
 
         payload = {
             "group_name": group_name,
@@ -174,28 +168,21 @@ class FullNodeAPI(BaseAPI):
 
     def get_content(
         self,
-        starttrx: str = None,
+        start_trx: str = None,
         group_id: str = None,
         num: int = 20,
         reverse: bool = False,
-        includestarttrx: bool = False,
+        include_start_trx: bool = False,
         senders: list = None,
     ) -> list:
-        """requests the content trxs of a group,return the list of the trxs data.
-        reverse: 默认按顺序获取, 如果是 True, 从最新的内容开始获取
-        starttrx: 某条内容的 Trx ID, 如果提供, 从该条之后(不包含)获取
-        num: 要获取内容条数, 默认获取最前面的 20 条内容
-        includestarttrx: 如果是 True, 获取内容包含 Trx ID 这条内容
-        """
         group_id = self._check_group_id_as_required(group_id)
-
         params = {
             "num": num,
             "reverse": reverse,
         }
-        if starttrx:
-            params["starttrx"] = starttrx
-            params["includestarttrx"] = includestarttrx
+        if start_trx:
+            params["start_trx"] = start_trx
+            params["include_start_trx"] = include_start_trx
         if senders:
             params["senders"] = senders
         trxs = []
@@ -211,7 +198,7 @@ class FullNodeAPI(BaseAPI):
             return trx
 
         trxs = self.get_content(
-            starttrx=trx_id, num=1, includestarttrx=True, group_id=group_id
+            start_trx=trx_id, num=1, include_start_trx=True, group_id=group_id
         )
         if trxs:
             trx = trxs[0]

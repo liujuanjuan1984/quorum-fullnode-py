@@ -35,14 +35,7 @@ class HttpRequest:
     ):
         url = "".join([self.api_base, endpoint])
         resp = self.session.request(method=method, url=url, json=payload)
-        logger.debug(
-            "%s\t%s\t%s\npayload: %s\nresp: %s",
-            method,
-            resp.status_code,
-            url,
-            payload,
-            resp.json(),
-        )
+        logger.debug("Payload %s", payload)
         return resp.json()
 
     def get(self, endpoint: str, payload: dict = None):
