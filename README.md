@@ -55,14 +55,8 @@ trxs = client.api.get_content()
 
 - quorum fullnode sdk for python: https://github.com/liujuanjuan1984/quorum-fullnode-py 
 - quorum mininode sdk for python: https://github.com/liujuanjuan1984/quorum-mininode-py 
-- quorum lightnode sdk for python: https://github.com/zhangwm404/quorum-lightnode-py 
-- quorum data module for python: https://github.com/liujuanjuan1984/quorum-data-py
-
-- quorum fullnode sdk for nodejs: https://github.com/okdaodine/rum-fullnode-sdk 
-- quorum lightnode sdk for nodejs: https://github.com/okdaodine/rum-sdk-nodejs
-
-- and more.. https://github.com/okdaodine/awesome-quorum
+- and more ...  https://github.com/okdaodine/awesome-quorum
 
 ### License
 
-This work is released under the `GPL3.0` license. A copy of the license is provided in the [LICENSE](https://github.com/liujuanjuan1984/quorum_fullnode_py/blob/master/LICENSE) file.
+This work is released under the `MIT` license. A copy of the license is provided in the [LICENSE](https://github.com/liujuanjuan1984/quorum_fullnode_py/blob/master/LICENSE) file.

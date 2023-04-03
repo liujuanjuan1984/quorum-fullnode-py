@@ -2,7 +2,7 @@ import logging
 
 from quorum_fullnode_py.client import FullNode, HttpRequest
 
-__version__ = "1.1.6"
+__version__ = "1.1.7"
 __author__ = "liujuanjuan1984"
 
 # Set default logging handler to avoid "No handler found" warnings.
