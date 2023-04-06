@@ -23,6 +23,9 @@ class BaseAPI:
     def _post(self, endpoint: str, payload: dict = None):
         return self._http.post(endpoint, payload)
 
+    def _delete(self, endpoint: str, payload: dict = None):
+        return self._http.delete(endpoint, payload)
+
     def _get_node(self):
         """get node info"""
         return self._get("/api/v1/node")
@@ -35,8 +38,11 @@ class BaseAPI:
         """return list of groups info which this node has joined"""
         return self._get(f"/api/v1/group/{group_id}")
 
-    def _get_seed(self, group_id: str = None):
-        return self._get(f"/api/v1/group/{group_id}/seed")
+    def _get_seed(self, group_id: str = None, include_chain_url: bool = False):
+        include_chain_url = json.dumps(include_chain_url)
+        return self._get(
+            f"/api/v1/group/{group_id}/seed?include_chain_url={include_chain_url}"
+        )
 
     def _get_block(self, group_id: str = None, block_id: str = None):
         return self._get(f"/api/v1/block/{group_id}/{block_id}")
@@ -60,11 +66,21 @@ class BaseAPI:
     def _clear_group(self, payload: dict = None):
         return self._post("/api/v1/group/clear", payload)
 
+    def _get_token_list(self):
+        return self._get("/app/api/v1/token/list")
+
     def _create_token(self, payload: dict = None):
-        return self._post("/app/api/v1/token/create", payload)
+        return self._post("/app/api/v1/token", payload)
 
     def _refresh_token(self, payload: dict = None):
         return self._post("/app/api/v1/token/refresh", payload)
+
+    def _revoke_token(self, payload: dict = None):
+        return self._post("/app/api/v1/token/revoke", payload)
+
+    def _remove_token(self, payload: dict = None):
+        """delete token from config file"""
+        return self._delete("/app/api/v1/token", payload)
 
     def _pubkeytoaddr(self, payload: dict = None):
         return self._post("/api/v1/tools/pubkeytoaddr", payload)

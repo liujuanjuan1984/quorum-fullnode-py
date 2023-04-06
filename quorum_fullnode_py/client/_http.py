@@ -43,3 +43,6 @@ class HttpRequest:
 
     def post(self, endpoint: str, payload: dict = None):
         return self._request("post", endpoint, payload)
+
+    def delete(self, endpoint: str, payload: dict = None):
+        return self._request("delete", endpoint, payload)

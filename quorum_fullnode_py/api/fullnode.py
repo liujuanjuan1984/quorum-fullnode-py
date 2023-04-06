@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 import logging
 
@@ -16,6 +17,14 @@ TRX_TYPES = [
     "BLOCK_PRODUCED",
     "ASK_PEERID",
 ]
+
+
+def _get_isoday(timedelta_days=0):
+    """return iso day format string 2027-04-28T08:10:36.675204+00:00"""
+    now = datetime.datetime.now(datetime.timezone.utc)
+    day = now + datetime.timedelta(days=timedelta_days)
+    iso = day.isoformat(timespec="seconds")
+    return iso
 
 
 def _check_trx_type(trx_type: str):
@@ -90,20 +99,79 @@ class FullNodeAPI(BaseAPI):
         return resp.get("addr", resp)
 
     def create_token(
-        self, name: str, role: str, allow_groups: list, expires_at: int
+        self,
+        role: str = None,
+        name: str = None,
+        group_id: str = None,
+        expires_at: str = None,
     ):
-        """Create a new auth token, only allow access from localhost"""
+        """Create a new auth token, only allow access from localhost
+        expires_at: ISO time 2027-04-28T08:10:36.675204+00:00"""
+
+        role = role or "node"
+        if role not in ("node", "chain"):
+            raise ParamValueError("role must be one of ['node','chain']")
+        if role == "chain":
+            group_id = None
+            name = name or "allow-chain"
+        else:
+            group_id = self._check_group_id_as_required(group_id)
+            name = name or f"allow-{group_id}"
+
+        expires_at = expires_at or _get_isoday(5 * 365)
         payload = {
             "name": name,
             "role": role,
-            "allow_groups": allow_groups,
+            "group_id": group_id,
             "expires_at": expires_at,
         }
         return super()._create_token(payload)
 
-    def refresh_token(self, payload):
-        """Get a new auth token"""
-        return super()._refresh_token(payload)
+    def refresh_token(self):
+        """refresh auth token.
+        For example, when the token is about to expire, they can use this interface to obtain a new token.
+        """
+        return super()._refresh_token()
+
+    def list_token(self):
+        """list all jwt tokens"""
+        return super()._get_token_list()
+
+    def revoke_token(
+        self, token: str = None, role: str = None, group_id: str = None
+    ):
+        """to revoke a usable token and make it unusable, then add it to the "revoke list" in the config file."""
+        role = role or "node"
+        if role not in ("node", "chain"):
+            raise ParamValueError("role must be one of ['node','chain']")
+        if role == "chain":
+            group_id = None
+        else:
+            group_id = self._check_group_id_as_required(group_id)
+        payload = {
+            "role": role,
+            "group_id": group_id,
+            "token": token,
+        }
+        return super()._revoke_token(payload)
+
+    def remove_token(
+        self, token: str = None, role: str = None, group_id: str = None
+    ):
+        """to delete token from config file"""
+        role = role or "node"
+        if role not in ("node", "chain"):
+            raise ParamValueError("role must be one of ['node','chain']")
+        if role == "chain":
+            group_id = None
+        else:
+            group_id = self._check_group_id_as_required(group_id)
+        payload = {
+            "role": role,
+            "group_id": group_id,
+            "token": token,
+        }
+        return super()._remove_token(payload)
 
     def group_network(self, group_id: str = None):
         """return the peers connented to the group"""
@@ -127,6 +195,7 @@ class FullNodeAPI(BaseAPI):
         app_key: str = "group_timeline",
         consensus_type: str = "poa",
         encryption_type: str = "public",
+        include_chain_url: bool = False,
     ) -> dict:
         """create a group, return the seed of the group."""
 
@@ -135,14 +204,17 @@ class FullNodeAPI(BaseAPI):
             "app_key": app_key,
             "consensus_type": consensus_type.lower(),
             "encryption_type": encryption_type.lower(),
+            "include_chain_url": include_chain_url,
         }
 
         return super()._create_group(payload)
 
-    def seed(self, group_id: str = None) -> str:
+    def seed(
+        self, group_id: str = None, include_chain_url: bool = False
+    ) -> str:
         """get the seed of a group which you've joined in."""
         group_id = self._check_group_joined_as_required(group_id)
-        resp = super()._get_seed(group_id)
+        resp = super()._get_seed(group_id, include_chain_url)
         return resp.get("seed", resp)
 
     def join_group(self, seed: str):
