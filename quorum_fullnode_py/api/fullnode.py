@@ -105,8 +105,10 @@ class FullNodeAPI(BaseAPI):
         group_id: str = None,
         expires_at: str = None,
     ):
-        """Create a new auth token, only allow access from localhost
-        expires_at: ISO time 2027-04-28T08:10:36.675204+00:00"""
+        """
+        Create a new auth token, only allow access from localhost
+        expires_at: ISO time 2027-04-28T08:10:36.675204+00:00
+        """
 
         role = role or "node"
         if role not in ("node", "chain"):
@@ -128,8 +130,10 @@ class FullNodeAPI(BaseAPI):
         return super()._create_token(payload)
 
     def refresh_token(self):
-        """refresh auth token.
-        For example, when the token is about to expire, they can use this interface to obtain a new token.
+        """
+        refresh auth token.
+        For example, when the token is about to expire,
+        they can use this interface to obtain a new token.
         """
         return super()._refresh_token()
 
@@ -140,7 +144,10 @@ class FullNodeAPI(BaseAPI):
     def revoke_token(
         self, token: str = None, role: str = None, group_id: str = None
     ):
-        """to revoke a usable token and make it unusable, then add it to the "revoke list" in the config file."""
+        """
+        to revoke a usable token and make it unusable,
+        then add it to the "revoke list" in the config file.
+        """
         role = role or "node"
         if role not in ("node", "chain"):
             raise ParamValueError("role must be one of ['node','chain']")
@@ -479,9 +486,9 @@ class FullNodeAPI(BaseAPI):
         )
 
     def producers(self, group_id: str = None):
-        """get the producers of the group"""
-        group_id = self._check_group_id_as_required(group_id)
-        return super()._get_producers(group_id)
+        """get the producers pubkey list of the group"""
+        bps = self.get_consensus(group_id).get("producers", [])
+        return [bp["ProducerPubkey"] for bp in bps]
 
     def get_announced_producers(self, group_id: str = None):
         """get the announced producers to be approved"""
@@ -495,7 +502,7 @@ class FullNodeAPI(BaseAPI):
             "group_id": group_id,
             "action": "add",
         }
-        return super()._post_producer(payload)
+        return super()._update_consensus(payload)
 
     def remove_producer(self, pubkeys: list, group_id: str = None):
         """remove pubkey as group producer from the group"""
@@ -504,7 +511,7 @@ class FullNodeAPI(BaseAPI):
             "group_id": group_id,
             "action": "remove",
         }
-        return super()._post_producer(payload)
+        return super()._update_consensus(payload)
 
     def announce_as_producer(self, group_id: str = None, memo: str = None):
         """announce fullnode self as producer"""
@@ -529,6 +536,75 @@ class FullNodeAPI(BaseAPI):
             "memo": memo or "announce self as producer to remove",
         }
         return super()._announce(payload)
+
+    def get_consensus(self, group_id: str = None):
+        group_id = self._check_group_id_as_required(group_id)
+        return super()._get_consensus(group_id)
+
+    def get_consensus_req(self, req_id: str, group_id: str = None):
+        group_id = self._check_group_id_as_required(group_id)
+        return super()._get_consensus_req(group_id, req_id)
+
+    def get_consensus_last(self, group_id: str = None):
+        group_id = self._check_group_id_as_required(group_id)
+        return super()._get_consensus_last(group_id)
+
+    def get_consensus_history(self, group_id: str = None):
+        group_id = self._check_group_id_as_required(group_id)
+        return super()._get_consensus_history(group_id)
+
+    def get_consensus_current(self, group_id: str = None):
+        group_id = self._check_group_id_as_required(group_id)
+        return super()._get_consensus_current(group_id)
+
+    def update_consensus(
+        self,
+        start_from_epoch: int,
+        trx_epoch_tick: int = None,
+        agreement_tick_length: int = None,
+        agreement_tick_count=None,
+        producer_pubkey: list = None,
+        group_id: str = None,
+    ):
+        group_id = self._check_group_id_as_required(group_id)
+        req_id = self.get_consensus(group_id).get("proof_req_id")
+        req = self.get_consensus_req(req_id, group_id).get("resps")[0]["Req"]
+
+        if trx_epoch_tick and trx_epoch_tick < 500:
+            raise ValueError("trx_epoch_tick should be greater than 500(ms)")
+        if agreement_tick_length and agreement_tick_length < 1000:
+            raise ValueError(
+                "agreement_tick_length should be greater than 1000(ms)"
+            )
+        if agreement_tick_count and agreement_tick_count < 10:
+            raise ValueError("agreement_tick_count should be greater than 10")
+
+        _exist = {
+            "group_id": group_id,
+            "start_from_epoch": req.get("StartFromEpoch") or 1,
+            "trx_epoch_tick": req.get("TrxEpochTickLenInMs") or 500,
+            "agreement_tick_Length": req.get("AgreementTickLenInMs") or 1000,
+            "agreement_tick_count": req.get("AgreementTickCount") or 10,
+            "producer_pubkey": req.get("ProducerPubkeyList") or [],
+        }
+
+        payload = {
+            "group_id": group_id,
+            "start_from_epoch": start_from_epoch or _exist["start_from_epoch"],
+            "trx_epoch_tick": trx_epoch_tick or _exist["trx_epoch_tick"],
+            "agreement_tick_Length": agreement_tick_length
+            or _exist["agreement_tick_Length"],
+            "agreement_tick_count": agreement_tick_count
+            or _exist["agreement_tick_count"],
+            "producer_pubkey": producer_pubkey or _exist["producer_pubkey"],
+        }
+
+        if payload == _exist:
+            return {"message": "Nothing to update"}
+        return super()._update_consensus(payload)
+
+    def update_user(self, payload: dict = None):
+        return super()._update_user(payload)
 
     def get_announced_users(self, group_id: str = None):
         """get the announced users to approve(add or remove)"""

@@ -146,14 +146,29 @@ class BaseAPI:
     def _get_announced_user(self, group_id: str = None, pubkey=None):
         return self._get(f"/api/v1/group/{group_id}/announced/user/{pubkey}")
 
-    def _get_producers(self, group_id: str = None):
-        return self._get(f"/api/v1/group/{group_id}/producers")
-
     def _get_announced_producers(self, group_id: str = None):
         return self._get(f"/api/v1/group/{group_id}/announced/producers")
 
     def _post_user(self, payload: dict = None):
         return self._post("/api/v1/group/user", payload)
 
-    def _post_producer(self, payload: dict = None):
-        return self._post("/api/v1/group/producer", payload)
+    def _get_consensus(self, group_id: str = None):
+        return self._get(f"/api/v1/group/{group_id}/consensus/")
+
+    def _get_consensus_req(self, group_id: str = None, req_id: str = None):
+        return self._get(f"/api/v1/group/{group_id}/consensus/proof/{req_id}")
+
+    def _get_consensus_last(self, group_id: str = None):
+        return self._get(f"/api/v1/group/{group_id}/consensus/proof/last")
+
+    def _get_consensus_history(self, group_id: str = None):
+        return self._get(f"/api/v1/group/{group_id}/consensus/proof/history")
+
+    def _get_consensus_current(self, group_id: str = None):
+        return self._get(f"/api/v1/group/{group_id}/consensus/proof/current")
+
+    def _update_consensus(self, payload: dict = None):
+        return self._post("/api/v1/group/updconsensus", payload)
+
+    def _update_user(self, payload: dict = None):
+        return self._post("/api/v1/group/upduser", payload)
