@@ -265,9 +265,13 @@ class FullNodeAPI(BaseAPI):
         if senders:
             params["senders"] = senders
         trxs = []
-        for i in super()._get_content(group_id, params):
-            i["Data"] = json.loads(base64.b64decode(i["Data"]))
-            trxs.append(i)
+        for trx in super()._get_content(group_id, params):
+            # private group will return trx without Data
+            try:
+                trx["Data"] = json.loads(base64.b64decode(trx["Data"]))
+            except Exception as err:
+                logger.warning(f"decode trx data error: {err}\n{trx}")
+            trxs.append(trx)
         return trxs
 
     def trx(self, trx_id: str, group_id: str = None):
@@ -559,7 +563,7 @@ class FullNodeAPI(BaseAPI):
 
     def update_consensus(
         self,
-        start_from_epoch: int,
+        start_from_epoch: int = None,
         trx_epoch_tick: int = None,
         agreement_tick_length: int = None,
         agreement_tick_count=None,
@@ -601,6 +605,13 @@ class FullNodeAPI(BaseAPI):
 
         if payload == _exist:
             return {"message": "Nothing to update"}
+
+        if payload["trx_epoch_tick"] < payload["agreement_tick_Length"]:
+            logger.warning(
+                "trx_epoch_tick %s should be greater than agreement_tick_Length %s",
+                payload["trx_epoch_tick"],
+                payload["agreement_tick_Length"],
+            )
         return super()._update_consensus(payload)
 
     def update_user(self, payload: dict = None):
