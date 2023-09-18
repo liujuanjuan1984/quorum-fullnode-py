@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="quorum_fullnode_py",
-    version="1.3.1",
+    version="1.3.2",
     author="liujuanjuan1984",
     author_email="qiaoanlu@163.com",
     description="Python SDK for FullNode of QuoRum",

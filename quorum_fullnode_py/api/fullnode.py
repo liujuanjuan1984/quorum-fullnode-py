@@ -572,8 +572,14 @@ class FullNodeAPI(BaseAPI):
     ):
         group_id = self._check_group_id_as_required(group_id)
         req_id = self.get_consensus(group_id).get("proof_req_id")
-        req = self.get_consensus_req(req_id, group_id).get("resps")[0]["Req"]
+        reqs = self.get_consensus_req(req_id, group_id).get("resps", [])
+        if not reqs:
+            req = {}
+        else:
+            req = reqs[0]["Req"]
 
+        if start_from_epoch is None:
+            start_from_epoch = 1
         if trx_epoch_tick and trx_epoch_tick < 500:
             raise ValueError("trx_epoch_tick should be greater than 500(ms)")
         if agreement_tick_length and agreement_tick_length < 1000:
